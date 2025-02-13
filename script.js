@@ -35,17 +35,37 @@ const AMIK_INFO = {
     }
 };
 
-// Welcome messages array
-const WELCOME_MESSAGES = [
-    "Hello! I'm AMIK AI ASSISTANT, how can I help you today?",
-    "Hi there! I'm AMIK CHATBOT, what would you like to talk about?",
-    "Hello! I'm AMIK AI ASSISTANT, here to assist you. What's on your mind?",
-    "Welcome! I'm AMIK CHATBOT, how may I help you today?",
-    "Hi! I'm AMIK AI ASSISTANT, ready to help. What would you like to discuss?"
-];
+// Welcome messages array with translations
+const WELCOME_MESSAGES = {
+    en: [
+        "Hello! I'm AMIK AI ASSISTANT, how can I help you today?",
+        "Hi there! I'm AMIK CHATBOT, what would you like to talk about?",
+        "Hello! I'm AMIK AI ASSISTANT, here to assist you. What's on your mind?",
+        "Welcome! I'm AMIK CHATBOT, how may I help you today?",
+        "Hi! I'm AMIK AI ASSISTANT, ready to help. What would you like to discuss?"
+    ],
+    ur: [
+        "السلام علیکم! میں AMIK AI ASSISTANT ہوں، آج میں آپ کی کیا مدد کر سکتا ہوں؟",
+        "السلام علیکم! میں AMIK CHATBOT ہوں، آپ کس بارے میں بات کرنا چاہیں گے؟",
+        "السلام علیکم! میں AMIK AI ASSISTANT ہوں، آپ کی خدمت کے لیے حاضر ہوں۔ آپ کے ذہن میں کیا ہے؟",
+        "خوش آمدید! میں AMIK CHATBOT ہوں، آج میں آپ کی کیا مدد کر سکتا ہوں؟",
+        "السلام علیکم! میں AMIK AI ASSISTANT ہوں، مدد کے لیے تیار ہوں۔ آپ کیا بات کرنا چاہیں گے؟"
+    ],
+    zh: [
+        "你好!我是 AMIK AI 助理,今天我能帮您什么?",
+        "您好!我是 AMIK 聊天机器人,您想聊些什么?",
+        "你好!我是 AMIK AI 助理,很高兴为您服务。您在想什么?",
+        "欢迎!我是 AMIK 聊天机器人,今天我能为您做些什么?",
+        "嗨!我是 AMIK AI 助理,随时准备帮助您。您想讨论什么?"
+    ]
+};
 
-// Update welcome message to be random
-const WELCOME_MESSAGE = WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)];
+// Function to get welcome message in current language
+const getWelcomeMessage = () => {
+    const lang = localStorage.getItem('selectedLanguage') || 'en';
+    const messages = WELCOME_MESSAGES[lang];
+    return messages[Math.floor(Math.random() * messages.length)];
+};
 
 // DOM Elements
 const chatMessages = document.getElementById('chat-messages');
@@ -56,6 +76,8 @@ const sidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menu-toggle');
 const newChatButton = document.getElementById('new-chat');
 const savedChatsList = document.getElementById('saved-chats-list');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const menuToggleBtn = document.getElementById('menu-toggle');
 
 // Typing control state
 let isTyping = false;
@@ -264,7 +286,6 @@ function getUrduResponse(englishResponse) {
     return urduResponses[englishResponse] || englishResponse;
 }
 
-// Update addBotMessage function
 async function addBotMessage(message) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message bot-message';
@@ -276,15 +297,65 @@ async function addBotMessage(message) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
     
+    // Add copy button at the top
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-btn';
+    copyButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+        </svg>
+    `;
+    copyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(message);
+            copyButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clip-rule="evenodd" />
+                </svg>
+            `;
+            copyButton.classList.add('copied');
+            setTimeout(() => {
+                copyButton.classList.remove('copied');
+                copyButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                    </svg>
+                `;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text:', err);
+        }
+    });
+    
     messageDiv.appendChild(botIcon);
     messageDiv.appendChild(contentDiv);
+    messageDiv.appendChild(copyButton);
+    
+    // Add copy button at the bottom
+    const bottomCopyButton = document.createElement('button');
+    bottomCopyButton.className = 'copy-btn bottom-copy-btn';
+    bottomCopyButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+        </svg>
+    `;
+    bottomCopyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(message);
+            bottomCopyButton.classList.add('copied');
+            setTimeout(() => bottomCopyButton.classList.remove('copied'), 1000);
+        } catch (err) {
+            console.error('Failed to copy text:', err);
+        }
+    });
+    messageDiv.appendChild(bottomCopyButton);
     chatMessages.appendChild(messageDiv);
     
     try {
         await typeText(contentDiv, message);
     } catch (error) {
         console.error('Error in typing:', error);
-        contentDiv.textContent = message; // Fallback if typing fails
+        contentDiv.textContent = message;
     }
     
     scrollToBottom();
@@ -445,11 +516,12 @@ function startNewChat() {
     // Update current chat ID
     currentChatId = generateUniqueId();
     
-    // Add welcome message
-    addBotMessage(WELCOME_MESSAGE);
+    // Add welcome message in current language
+    const welcomeMsg = getWelcomeMessage();
+    addBotMessage(welcomeMsg);
     conversationHistory.push({
         role: 'assistant',
-        content: WELCOME_MESSAGE,
+        content: welcomeMsg,
         timestamp: new Date().toISOString()
     });
 
@@ -465,6 +537,19 @@ function startNewChat() {
     // Focus on input
     userInput.focus();
 }
+
+// Add event listener for language changes
+document.addEventListener('languageChanged', (e) => {
+    const lang = e.detail.language;
+    // Update welcome message if it's the only message
+    if (conversationHistory.length === 1 && conversationHistory[0].role === 'assistant') {
+        const welcomeMsg = getWelcomeMessage();
+        conversationHistory[0].content = welcomeMsg;
+        loadChatMessages(conversationHistory);
+    }
+    // Update chat titles
+    updateSavedChatsList();
+});
 
 // Load saved chats from localStorage
 function loadSavedChats() {
@@ -596,8 +681,13 @@ function generateUniqueId() {
 // Toggle sidebar
 function toggleSidebar() {
     sidebar.classList.toggle('open');
-    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    sidebarOverlay.classList.toggle('active');
+    menuToggleBtn.classList.toggle('active');
+    document.body.classList.toggle('sidebar-open');
 }
+
+// Add event listener for overlay click
+sidebarOverlay.addEventListener('click', toggleSidebar);
 
 // Save current chat
 function saveCurrentChat() {
@@ -698,9 +788,11 @@ document.addEventListener('keydown', (e) => {
 
 // Close sidebar on window resize if it's open
 window.addEventListener('resize', () => {
-    if (window.innerWidth > 767 && sidebar.classList.contains('open')) {
+    if (window.innerWidth > 767) {
         sidebar.classList.remove('open');
-        document.body.style.overflow = '';
+        sidebarOverlay.classList.remove('active');
+        menuToggleBtn.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
     }
 });
 

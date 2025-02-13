@@ -5,20 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AMIK AI ASSISTANT - Developed by ABDULLAH FAROOQ</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <button id="new-chat" class="new-chat-btn">
+
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4V20M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <span>New Chat</span>
+                <span data-i18n="newChat">New Chat</span>
             </button>
             <div class="saved-chats">
                 <div id="saved-chats-list">
-                    <!-- Saved chats will be listed here -->
+                    <!-- Example of how chat items should be structured -->
+                    <div class="saved-chat-item" data-chat-id="1">
+                        <div class="chat-title" data-original-text="chatHistory">Chat History</div>
+                        <button class="delete-chat-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Actual chat items will be added here dynamically -->
                 </div>
             </div>
         </div>
@@ -28,22 +42,38 @@
             <!-- Chat Header -->
             <div class="chat-header">
                 <button id="menu-toggle" class="menu-toggle">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor"/>
-                    </svg>
+                    <div class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </button>
-                <h2>AMIK AI ASSISTANT</h2>
+                <h2 data-i18n="amikAssistant">AMIK AI ASSISTANT</h2>
+                <div class="language-selector">
+                    <button id="lang-toggle" class="lang-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div id="lang-dropdown" class="lang-dropdown">
+                        <div class="lang-option" data-lang="en">English</div>
+                        <div class="lang-option" data-lang="ur">اردو</div>
+                        <div class="lang-option" data-lang="zh">中文</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Chat Messages -->
             <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be added here dynamically -->
+                <div class="message bot-message">
+                    <div class="message-content welcome-message">Hello! How can I assist you today?</div>
+                </div>
             </div>
 
             <!-- Input Area -->
             <div class="input-area">
                 <div class="chat-input-container">
-                    <input type="text" id="user-input" placeholder="Ask AMIK AI anything..." autocomplete="off">
+                    <input type="text" id="user-input" data-i18n="askAnything" placeholder="Ask AMIK AI anything..." autocomplete="off">
                     <button id="pause-btn" class="control-btn hidden">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
@@ -57,13 +87,14 @@
                         </svg>
                     </button>
                 </div>
-                <div class="input-footer">
+                <div class="input-footer" data-i18n="amikCanMakeMistakes">
                     AMIK can make mistakes. Consider checking important information.
                 </div>
             </div>
         </div>
     </div>
     <script src="script.js"></script>
+    <script src="translations.js"></script>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
